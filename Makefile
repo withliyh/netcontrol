@@ -18,9 +18,14 @@ define Package/netcontrol/description
 	control net firewall
 endef
 
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)
+endef
+
 define Package/netcontrol/install
 	$(INSTALL_DIR) $(1)/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/netcontrol $(1)/bin/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/netcontrol $(1)/bin/
 endef
 
 $(eval $(call BuildPackage,netcontrol))

@@ -22,12 +22,12 @@
 CFLAGS=-c -Wall -D_REENTRANT -I$(PREFIX)/include $(ADDITIONALFLAGS)
 LIBS=-lc -lmicrohttpd -ljansson -lcurl
 OUTPUT=netcontrol
-VERSION=0.14.0
+#VERSION=0.14.0
 
 all: release
 
 netcontrol: netcontrol.o callcmd.o parse.o ulfius.o u_map.o u_request.o u_response.o u_send_request.o yder.o orcania.o
-	$(CC) -o $(OUTPUT)-$(VERSION) netcontrol.o callcmd.o parse.o ulfius.o u_map.o u_request.o u_response.o u_send_request.o yder.o orcania.o  $(LIBS)
+	$(CC) -o $(OUTPUT) netcontrol.o callcmd.o parse.o ulfius.o u_map.o u_request.o u_response.o u_send_request.o yder.o orcania.o  $(LIBS)
 
 netcontrol.o: netcontrol.c
 	$(CC) $(CFLAGS) netcontrol.c
@@ -60,17 +60,13 @@ u_send_request.o: ulfius.h u_send_request.c
 	$(CC) $(CFLAGS) $(FLAGS_YDER) u_send_request.c
 
 clean:
-	rm -f *.o *.so $(OUTPUT) $(OUTPUT)-*
+	rm -f *.o *.so $(OUTPUT) 
 
 install: all
-	cp $(OUTPUT).$(VERSION) $(PREFIX)/lib
-	cp ulfius.h $(PREFIX)/include
-	ldconfig -r $(PREFIX)
+	#cp $(OUTPUT) /bin
 
 uninstall:
-	rm -f $(PREFIX)/lib/$(OUTPUT)
-	rm -f $(PREFIX)/lib/$(OUTPUT)-*
-	rm -f $(PREFIX)/include/ulfius.h
+	rm -f /bin/$(OUTPUT)
 
 debug: ADDITIONALFLAGS=-DDEBUG -g -O0
 
