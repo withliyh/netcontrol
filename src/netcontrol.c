@@ -21,7 +21,7 @@
 #include "parse.h"
 #include "callcmd.h"
 
-#define PORT 4000
+#define PORT 4100
 #define PREFIXRULES "/api/rules"
 
 static json_t *error_reason_response(int code, char* reason);
