@@ -111,7 +111,7 @@ int main (int argc, char **argv) {
   ulfius_add_endpoint_by_val(&instance, "GET", PREFIXRULES, "/forward", NULL, NULL, NULL, &callback_get_forward, NULL);
   ulfius_add_endpoint_by_val(&instance, "POST", PREFIXRULES, "/forward", NULL, NULL, NULL, &callback_post_forward, NULL);
   ulfius_add_endpoint_by_val(&instance, "GET", PREFIXRULES, "/forward/:num", NULL, NULL, NULL, &callback_del_forward, NULL);
-  ulfius_add_endpoint_by_val(&instance, "DEL", PREFIXRULES, "/forward", NULL, NULL, NULL, &callback_del_forward, NULL);
+  ulfius_add_endpoint_by_val(&instance, "DELETE", PREFIXRULES, "/forward", NULL, NULL, NULL, &callback_del_forward, NULL);
   
   // default_endpoint declaration
   ulfius_set_default_endpoint(&instance, NULL, NULL, NULL, &callback_default, NULL);
@@ -202,8 +202,7 @@ int callback_post_forward(const struct _u_request * request, struct _u_response 
     json_t *rule;
     const char *s, *d, *p, *j;
 
-    json_array_foreach(rules, index, rule) {
-
+    for (index=0; (index< json_array_size(rules)) && (rule = json_array_get(rules, index)); index++) {
         json_t *s_json = json_object_get(rule, "s");
         s = json_string_value(s_json);
 
@@ -242,6 +241,7 @@ int callback_post_forward(const struct _u_request * request, struct _u_response 
 
 int callback_del_forward(const struct _u_request * request, struct _u_response * response, void * user_data)
 {
+    response->status = 400;
     const char *str_num = u_map_get(request->map_url, "num");
     if (str_num != NULL) {
         int num = atoi(str_num); 
@@ -265,11 +265,67 @@ int callback_del_forward(const struct _u_request * request, struct _u_response *
         } else {
             response->json_body = error_reason_response(0, "success");
             response->status = 201;
+            return U_OK;
         }
-    } else {
-        response->json_body = error_reason_response(-1, "no find num");
-        response->status = 400;
     }
+
+    if (request->json_has_error) {
+        json_error_t *error = request->json_error;
+        response->json_body = error_reason_response(-1, error->text);
+        return U_OK;
+    }
+
+    json_t *rules = json_object_get(request->json_body, "rules");
+    if (rules == NULL) {
+        response->json_body = error_reason_response(-1, "cant find key: rules");
+        return U_OK;
+    }
+
+    size_t rules_num = json_array_size(rules);
+    if (rules_num == 0) {
+        response->json_body = error_reason_response(-1, "find key rules but not find rule");
+        return U_OK;
+    }
+
+    size_t index;
+    json_t *rule;
+    const char *s, *d, *p, *j;
+
+    for (index=0; (index< json_array_size(rules)) && (rule = json_array_get(rules, index)); index++) {
+        json_t *s_json = json_object_get(rule, "s");
+        s = json_string_value(s_json);
+
+        json_t *d_json = json_object_get(rule, "d");
+        d = json_string_value(d_json);
+        
+        json_t *p_json = json_object_get(rule, "p");
+        p = json_string_value(p_json);
+
+        json_t *j_json = json_object_get(rule, "j");
+        j = json_string_value(j_json);
+
+        output *output_list;
+        int r = del_iptables_by_filter(s, d, p, j, &output_list);
+        if (r != 0) {
+            char reason_buf[1024];
+            char *reason;
+            struct list_head *pos, *n;
+
+            memset(reason_buf, 0, 1024);
+            list_for_each_safe(pos, n, &output_list->list) {
+                output *entry= list_entry(pos, output, list);
+                strcat(reason_buf, entry->line);
+            }
+            reason = strdup(reason_buf);
+            response->json_body = error_reason_response(r, reason != NULL ? reason : "");
+            response->status = 400;
+            return U_OK;
+        }
+    }
+
+    response->json_body = error_reason_response(0, "success");
+    response->status = 201;
+
     return U_OK;
 }
 

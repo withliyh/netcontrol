@@ -1,28 +1,6 @@
-#
-# Ulfius Framework
-#
-# Makefile used to build the software
-#
-# Copyright 2014-2015 Nicolas Mora <mail@babelouest.org>
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public License
-# as published by the Free Software Foundation;
-# version 2.1 of the License.
-#
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-# GNU GENERAL PUBLIC LICENSE for more details.
-#
-# You should have received a copy of the GNU General Public
-# License along with this library.	If not, see <http://www.gnu.org/licenses/>.
-#
-
-CFLAGS=-c -Wall -D_REENTRANT -I$(PREFIX)/include $(ADDITIONALFLAGS)
+CFLAGS=-c -Wall  $(ADDITIONALFLAGS)
 LIBS=-lc -lmicrohttpd -ljansson -lcurl
 OUTPUT=netcontrol
-#VERSION=0.14.0
 
 all: release
 
@@ -62,11 +40,8 @@ u_send_request.o: ulfius.h u_send_request.c
 clean:
 	rm -f *.o *.so $(OUTPUT) 
 
-install: all
-	#cp $(OUTPUT) /bin
+install:
 
-uninstall:
-	rm -f /bin/$(OUTPUT)
 
 debug: ADDITIONALFLAGS=-DDEBUG -g -O0
 
