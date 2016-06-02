@@ -67,7 +67,7 @@ int del_iptables_by_num(int n, output **list)
     return call_cmd(buf, list);
 }
 
-int del_iptables_by_filter(char* s, char* d, char* p, char* j, output **list)
+int del_iptables_by_filter(char* s, char* d, char* p, char* j, char* nd, output **list)
 {
     char buf[1024];
     memset(buf, 0, 1024);
@@ -77,6 +77,9 @@ int del_iptables_by_filter(char* s, char* d, char* p, char* j, output **list)
         strcat(buf, s);
     }
     if (d && assert(buf, 1024, d)) {
+	if (nd != NULL && strlen(nd) > 0) {
+	    strcat(buf, "!");
+	}
         strcat(buf, " -d ");
         strcat(buf, d);
     }
@@ -91,16 +94,19 @@ int del_iptables_by_filter(char* s, char* d, char* p, char* j, output **list)
     return call_cmd(buf, list);
 }
 
-int post_iptables(const char* s, const char* d, const char* p, const char* j, output **list)
+int post_iptables(const char* s, const char* d, const char* p, const char* j, const char* nd, output **list)
 {
     char buf[1024];
     memset(buf, 0, 1024);
-    snprintf(buf, 1024, "iptables -t filter -A FORWARD ");
+    snprintf(buf, 1024, "iptables -t filter -I FORWARD 1 ");
     if (s && assert(buf, 1024, s)) {
         strcat(buf, " -s ");
         strcat(buf, s);
     }
     if (d && assert(buf, 1024, d)) {
+	if (nd != NULL && strlen(nd) > 0) {
+	    strcat(buf, "!");
+	}
         strcat(buf, " -d ");
         strcat(buf, d);
     }

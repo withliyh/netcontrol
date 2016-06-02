@@ -31,8 +31,8 @@ endef
 define Package/netcontrol/install
 	$(INSTALL_DIR) $(1)/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/netcontrol $(1)/bin/
-	$(CP) $(TOPDIR)/staging_dir/target-mips_34kc_uClibc-0.9.33.2/root-ar71xx/usr/lib/* $(1)/bin
-	$(CP) $(TOPDIR)/staging_dir/toolchain-mips_34kc_gcc-4.8-linaro_uClibc-0.9.33.2/lib/libc.so $(1)/bin/libc.so.6
+	#$(CP) $(TOPDIR)/staging_dir/target-mips_34kc_uClibc-0.9.33.2/root-ar71xx/usr/lib/* $(1)/bin
+	#$(CP) $(TOPDIR)/staging_dir/toolchain-mips_34kc_gcc-4.8-linaro_uClibc-0.9.33.2/lib/libc.so $(1)/bin/libc.so.6
 endef
 
 $(eval $(call BuildPackage,netcontrol))

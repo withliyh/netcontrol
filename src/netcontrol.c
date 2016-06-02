@@ -108,10 +108,11 @@ int main (int argc, char **argv) {
   
   
   // Endpoint list declaration
+  ulfius_add_endpoint_by_val(&instance, "POST", PREFIXRULES, "/forward/del", NULL, NULL, NULL, &callback_del_forward, NULL);
+  ulfius_add_endpoint_by_val(&instance, "GET", PREFIXRULES, "/forward/:num", NULL, NULL, NULL, &callback_del_forward, NULL);
+  ulfius_add_endpoint_by_val(&instance, "DELETE", PREFIXRULES, "/forward/:num", NULL, NULL, NULL, &callback_del_forward, NULL);
   ulfius_add_endpoint_by_val(&instance, "GET", PREFIXRULES, "/forward", NULL, NULL, NULL, &callback_get_forward, NULL);
   ulfius_add_endpoint_by_val(&instance, "POST", PREFIXRULES, "/forward", NULL, NULL, NULL, &callback_post_forward, NULL);
-  ulfius_add_endpoint_by_val(&instance, "GET", PREFIXRULES, "/forward/:num", NULL, NULL, NULL, &callback_del_forward, NULL);
-  ulfius_add_endpoint_by_val(&instance, "DELETE", PREFIXRULES, "/forward", NULL, NULL, NULL, &callback_del_forward, NULL);
   
   // default_endpoint declaration
   ulfius_set_default_endpoint(&instance, NULL, NULL, NULL, &callback_default, NULL);
@@ -201,6 +202,7 @@ int callback_post_forward(const struct _u_request * request, struct _u_response 
     size_t index;
     json_t *rule;
     const char *s, *d, *p, *j;
+    const char *ns, *nd;
 
     for (index=0; (index< json_array_size(rules)) && (rule = json_array_get(rules, index)); index++) {
         json_t *s_json = json_object_get(rule, "s");
@@ -215,8 +217,12 @@ int callback_post_forward(const struct _u_request * request, struct _u_response 
         json_t *j_json = json_object_get(rule, "j");
         j = json_string_value(j_json);
 
+	json_t *nd_json = json_object_get(rule, "nd");
+	nd = json_string_value(nd_json);
+	
+
         output *output_list;
-        int r = post_iptables(s, d, p, j, &output_list);
+        int r = post_iptables(s, d, p, j, nd, &output_list);
         if (r != 0) {
             char reason_buf[1024];
             char *reason;
@@ -290,6 +296,7 @@ int callback_del_forward(const struct _u_request * request, struct _u_response *
     size_t index;
     json_t *rule;
     const char *s, *d, *p, *j;
+    const char *ns, *nd;
 
     for (index=0; (index< json_array_size(rules)) && (rule = json_array_get(rules, index)); index++) {
         json_t *s_json = json_object_get(rule, "s");
@@ -304,8 +311,11 @@ int callback_del_forward(const struct _u_request * request, struct _u_response *
         json_t *j_json = json_object_get(rule, "j");
         j = json_string_value(j_json);
 
+	json_t *nd_json = json_object_get(rule, "nd");
+	nd = json_string_value(nd_json);
+
         output *output_list;
-        int r = del_iptables_by_filter(s, d, p, j, &output_list);
+        int r = del_iptables_by_filter(s, d, p, j, nd, &output_list);
         if (r != 0) {
             char reason_buf[1024];
             char *reason;
